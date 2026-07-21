@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KEYFORGE</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23121826'/%3E%3Cstop offset='1' stop-color='%23050914'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2357ACFF'/%3E%3Cstop offset='1' stop-color='%230A66D6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23g)'/%3E%3Ccircle cx='38' cy='38' r='20' fill='none' stroke='url(%23b)' stroke-width='9'/%3E%3Cpath d='M52 52 L78 78 M78 78 V60 M78 78 H60' stroke='url(%23b)' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23121826'/%3E%3Cstop offset='1' stop-color='%23050914'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2357ACFF'/%3E%3Cstop offset='1' stop-color='%230A66D6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23g)'/%3E%3Ccircle cx='38' cy='38' r='20' fill='none' stroke='url(%23b)' stroke-width='9'/%3E%3Cpath d='M52 52 L78 78 M78 78 V60 M78 78 H60' stroke='url(%23b)' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{
+    --bg:#050914;
+    --surface:rgba(255,255,255,0.055);
+    --surface-2:rgba(255,255,255,0.09);
+    --border:rgba(255,255,255,0.14);
+    --border-hi:rgba(255,255,255,0.35);
+    --text:#F2F5FA;
+    --muted:#8C97AD;
+    --brass:#3E9DFF;
+    --brass-dim:#0A66D6;
+    --good:#63D48A;
+    --warn:#F0B94E;
+    --danger:#FF6B6E;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+  body{
+    padding-top:calc(var(--safe-top) + 20px);
+    padding-bottom:calc(var(--safe-bottom) + 40px);
+    padding-left:20px;
+    padding-right:20px;
+    background:
+      radial-gradient(circle at 15% -5%, rgba(62,157,255,0.30), transparent 42%),
+      radial-gradient(circle at 100% 15%, rgba(90,110,255,0.18), transparent 40%),
+      radial-gradient(circle at 20% 90%, rgba(30,90,220,0.16), transparent 45%),
+      var(--bg);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:480px;margin:0 auto;}
+
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+  .wordmark{font-family:'Fraunces',serif;font-weight:600;font-size:22px;letter-spacing:0.5px;display:flex;align-items:center;gap:8px;}
+  .wordmark svg{width:20px;height:20px;}
+  .status-pill{
+    font-size:11px;color:var(--muted);border:1px solid var(--border);padding:5px 12px;border-radius:100px;
+    font-family:'IBM Plex Mono',monospace;background:rgba(255,255,255,0.05);backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+  }
+  .status-pill.on{color:var(--good);border-color:rgba(99,212,138,0.35);}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-top-color:var(--border-hi);
+    border-radius:22px;padding:22px;margin-bottom:16px;
+    backdrop-filter:blur(28px) saturate(180%);
+    -webkit-backdrop-filter:blur(28px) saturate(180%);
+    box-shadow:0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  }
+  .card h2{font-family:'Fraunces',serif;font-weight:500;font-size:15px;margin:0 0 4px;color:var(--text);}
+  .card .sub{font-size:13px;color:var(--muted);margin:0 0 18px;line-height:1.5;}
+
+  input{
+    width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;
+    padding:13px 14px;color:var(--text);font-size:16px;font-family:'Inter',sans-serif;margin-bottom:10px;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  }
+  input:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(62,157,255,0.18);}
+  input::placeholder{color:var(--muted);}
+
+  button{
+    width:100%;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;
+    font-family:'Inter',sans-serif;cursor:pointer;transition:opacity .15s ease, transform .1s ease;
+  }
+  button:active{transform:scale(0.98);}
+  button:disabled{opacity:0.5;cursor:default;}
+  .btn-primary{
+    background:linear-gradient(180deg, #57ACFF, var(--brass-dim));color:#FFFFFF;
+    box-shadow:0 4px 18px rgba(62,157,255,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
+  }
+  .btn-ghost{
+    background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  }
+  .btn-danger-ghost{background:rgba(255,107,110,0.06);border:1px solid rgba(255,107,110,0.3);color:var(--danger);}
+  .link-btn{background:none;border:none;color:var(--brass);font-size:13px;padding:6px 0;width:auto;text-decoration:underline;text-underline-offset:3px;}
+
+  .error{color:var(--danger);font-size:13px;margin:-2px 0 12px;min-height:0;}
+  .msg{color:var(--good);font-size:13px;margin:-2px 0 12px;}
+
+  /* --- Key forge signature element --- */
+  .forge-empty{
+    border:1px dashed var(--border);border-radius:16px;padding:28px 16px;text-align:center;color:var(--muted);font-size:13px;
+    background:rgba(255,255,255,0.02);
+  }
+  .key-plate{
+    background:rgba(0,0,0,0.35);border:1px solid var(--border);border-radius:16px;padding:16px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .key-plate .key-text{
+    font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:var(--text);letter-spacing:0.3px;
+    overflow-x:auto;white-space:nowrap;flex:1;
+  }
+  .key-plate .key-text.reveal span{
+    display:inline-block; opacity:0; animation:engrave 0.03s ease forwards;
+  }
+  @keyframes engrave{
+    from{opacity:0; transform:translateY(2px); text-shadow:0 0 10px rgba(62,157,255,0.9);}
+    to{opacity:1; transform:translateY(0); text-shadow:none;}
+  }
+  .copy-btn{
+    flex-shrink:0;background:rgba(255,255,255,0.08);border:1px solid var(--border);color:var(--brass);
+    width:auto;padding:8px 12px;font-size:12px;border-radius:10px;font-family:'IBM Plex Mono',monospace;
+  }
+  .one-time-banner{
+    display:flex;gap:8px;align-items:flex-start;background:rgba(240,185,78,0.08);
+    border:1px solid rgba(240,185,78,0.28);border-radius:14px;padding:10px 12px;margin-bottom:14px;
+    font-size:12px;color:var(--warn);line-height:1.5;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  }
+
+  .prefix-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .prefix-row .prefix{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--muted);}
+  .badge{font-size:11px;padding:3px 9px;border-radius:100px;font-family:'IBM Plex Mono',monospace;}
+  .badge.active{color:var(--good);background:rgba(99,212,138,0.12);}
+  .badge.revoked{color:var(--danger);background:rgba(255,107,110,0.12);}
+
+  /* usage ring */
+  .usage-row{display:flex;align-items:center;gap:16px;}
+  .ring{width:64px;height:64px;flex-shrink:0;}
+  .ring circle{fill:none;stroke-width:6;}
+  .ring .track{stroke:var(--border);}
+  .ring .fill{stroke:var(--brass);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .6s ease;}
+  .usage-copy .num{font-family:'Fraunces',serif;font-size:20px;color:var(--text);}
+  .usage-copy .label{font-size:12px;color:var(--muted);}
+
+  pre.snippet{
+    background:rgba(0,0,0,0.35);border:1px solid var(--border);border-radius:14px;padding:14px;
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.6;color:#B8C4D9;
+    overflow-x:auto;margin:0;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  }
+  pre.snippet .k{color:var(--brass);}
+  pre.snippet .s{color:#9FC98B;}
+
+  .foot-note{text-align:center;font-size:11px;color:var(--muted);margin-top:24px;line-height:1.6;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="wordmark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="8" cy="8" r="5" stroke="#3E9DFF" stroke-width="2"/>
+        <path d="M11.5 11.5L20 20M20 20V15M20 20H15" stroke="#3E9DFF" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      KEYFORGE
+    </div>
+    <div id="statusPill" class="status-pill">non connesso</div>
+  </header>
+
+  <!-- AUTH VIEW -->
+  <div id="authView">
+    <div class="card">
+      <h2 id="authTitle">Accedi</h2>
+      <p class="sub">Entra per generare la tua chiave API gratuita e iniziare a chiamare il modello AI.</p>
+      <div id="authError" class="error"></div>
+      <input id="emailInput" type="email" placeholder="Email" autocomplete="email">
+      <input id="passInput" type="password" placeholder="Password" autocomplete="current-password">
+      <button class="btn-primary" id="authSubmitBtn">Accedi</button>
+      <button class="link-btn" id="authToggleBtn">Non hai un account? Registrati</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="dashView" class="hidden">
+
+    <div class="card">
+      <h2>La tua chiave</h2>
+      <p class="sub">Usala nell'header <span style="font-family:'IBM Plex Mono',monospace;color:var(--text)">Authorization: Bearer</span> per chiamare l'API.</p>
+
+      <div id="noKeyState" class="forge-empty">
+        Nessuna chiave ancora generata.
+      </div>
+
+      <div id="revealState" class="hidden">
+        <div class="one-time-banner">
+          ⚠ Questa chiave viene mostrata una sola volta. Copiala ora — non potrai rivederla.
+        </div>
+        <div class="key-plate">
+          <span id="rawKeyText" class="key-text reveal"></span>
+          <button class="copy-btn" id="copyRawBtn">Copia</button>
+        </div>
+      </div>
+
+      <div id="hasKeyState" class="hidden">
+        <div class="prefix-row">
+          <span class="prefix" id="keyPrefixLabel">ai_sk_••••••••</span>
+          <span class="badge active" id="keyBadge">attiva</span>
+        </div>
+      </div>
+
+      <div id="keyMsg" class="msg"></div>
+      <button class="btn-primary" id="genKeyBtn">Genera nuova chiave</button>
+      <div style="height:8px"></div>
+      <button class="btn-danger-ghost hidden" id="revokeBtn">Revoca chiave</button>
+    </div>
+
+    <div class="card" id="usageCard" style="display:none">
+      <h2>Utilizzo di oggi</h2>
+      <div class="usage-row">
+        <svg class="ring" viewBox="0 0 64 64">
+          <circle class="track" cx="32" cy="32" r="26"/>
+          <circle class="fill" id="usageRing" cx="32" cy="32" r="26" stroke-dasharray="163" stroke-dashoffset="163"/>
+        </svg>
+        <div class="usage-copy">
+          <div class="num" id="usageNum">0 / 50</div>
+          <div class="label">richieste usate, reset ogni giorno</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Come chiamare l'API</h2>
+      <p class="sub">Esempio pronto — sostituisci la chiave con la tua.</p>
+      <pre class="snippet" id="snippetBlock"></pre>
+    </div>
+
+    <button class="btn-ghost" id="logoutBtn">Esci</button>
+  </div>
+
+  <p class="foot-note">KEYFORGE · portale sviluppatori · chiavi gratuite<br>limite 50 richieste/giorno per chiave</p>
+</div>
+
+<script>
+const SUPABASE_URL = "https://nphqaubafihwgbortjjk.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5waHFhdWJhZmlod2dib3J0amprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NTkxMDYsImV4cCI6MjEwMDIzNTEwNn0.k15z_NH8IqFkgHwU-5G0SJ2-Mt12sal2X5TkOFAM61w";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let isLoginMode = true;
+let currentSession = null;
+
+const el = id => document.getElementById(id);
+
+// ---------- AUTH ----------
+el('authToggleBtn').onclick = () => {
+  isLoginMode = !isLoginMode;
+  el('authTitle').textContent = isLoginMode ? 'Accedi' : 'Crea account';
+  el('authSubmitBtn').textContent = isLoginMode ? 'Accedi' : 'Registrati';
+  el('authToggleBtn').textContent = isLoginMode ? 'Non hai un account? Registrati' : 'Hai già un account? Accedi';
+  el('authError').textContent = '';
+};
+
+el('authSubmitBtn').onclick = async () => {
+  const email = el('emailInput').value.trim();
+  const password = el('passInput').value;
+  el('authError').textContent = '';
+  if(!email || !password){ el('authError').textContent = 'Inserisci email e password.'; return; }
+
+  el('authSubmitBtn').disabled = true;
+  const { data, error } = isLoginMode
+    ? await sb.auth.signInWithPassword({ email, password })
+    : await sb.auth.signUp({ email, password });
+  el('authSubmitBtn').disabled = false;
+
+  if(error){ el('authError').textContent = error.message; return; }
+  if(!isLoginMode && !data.session){
+    el('authError').textContent = '';
+    el('authError').style.color = 'var(--good)';
+    el('authError').textContent = 'Controlla la tua email per confermare l\\'account.';
+    return;
+  }
+  onLoggedIn(data.session);
+};
+
+el('logoutBtn').onclick = async () => {
+  await sb.auth.signOut();
+  currentSession = null;
+  el('dashView').classList.add('hidden');
+  el('authView').classList.remove('hidden');
+  el('statusPill').textContent = 'non connesso';
+  el('statusPill').classList.remove('on');
+};
+
+async function onLoggedIn(session){
+  currentSession = session;
+  el('authView').classList.add('hidden');
+  el('dashView').classList.remove('hidden');
+  el('statusPill').textContent = session.user.email;
+  el('statusPill').classList.add('on');
+  await loadKeyState();
+}
+
+// ---------- KEY STATE ----------
+async function loadKeyState(){
+  const { data, error } = await sb
+    .from('api_keys')
+    .select('*')
+    .order('created_at', { ascending:false })
+    .limit(1)
+    .maybeSingle();
+
+  el('revealState').classList.add('hidden');
+
+  if(!data){
+    el('noKeyState').classList.remove('hidden');
+    el('hasKeyState').classList.add('hidden');
+    el('usageCard').style.display = 'none';
+    el('revokeBtn').classList.add('hidden');
+    return;
+  }
+
+  el('noKeyState').classList.add('hidden');
+  el('hasKeyState').classList.remove('hidden');
+  el('keyPrefixLabel').textContent = data.key_prefix;
+  el('keyBadge').textContent = data.attiva ? 'attiva' : 'revocata';
+  el('keyBadge').className = 'badge ' + (data.attiva ? 'active' : 'revoked');
+  el('revokeBtn').classList.toggle('hidden', !data.attiva);
+
+  const today = new Date().toISOString().slice(0,10);
+  const used = data.ultimo_reset === today ? data.richieste_oggi : 0;
+  const limit = data.limite_giornaliero;
+  el('usageCard').style.display = 'block';
+  el('usageNum').textContent = `${used} / ${limit}`;
+  const circumference = 163;
+  const offset = circumference - (Math.min(used/limit,1) * circumference);
+  el('usageRing').style.strokeDashoffset = offset;
+
+  el('snippetBlock').innerHTML =
+`<span class="k">curl</span> https://nphqaubafihwgbortjjk.supabase.co/functions/v1/ai-proxy \\
+  -H <span class="s">"Authorization: Bearer ${data.key_prefix.replace('...','…la-tua-chiave')}"</span> \\
+  -H <span class="s">"Content-Type: application/json"</span> \\
+  -d <span class="s">'{"messages":[{"role":"user","content":"Ciao!"}]}'</span>`;
+}
+
+el('genKeyBtn').onclick = async () => {
+  el('genKeyBtn').disabled = true;
+  el('keyMsg').textContent = '';
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-key`, {
+    method:'POST',
+    headers:{
+      'Authorization': `Bearer ${currentSession.access_token}`,
+      'Content-Type':'application/json'
+    },
+    body: JSON.stringify({})
+  });
+  const json = await res.json();
+  el('genKeyBtn').disabled = false;
+
+  if(!res.ok){ el('keyMsg').style.color='var(--danger)'; el('keyMsg').textContent = json.error || 'Errore nella generazione.'; return; }
+
+  el('revealState').classList.remove('hidden');
+  const span = el('rawKeyText');
+  span.innerHTML = '';
+  [...json.key].forEach((ch, i) => {
+    const s = document.createElement('span');
+    s.textContent = ch;
+    s.style.animationDelay = (i * 18) + 'ms';
+    span.appendChild(s);
+  });
+  el('copyRawBtn').onclick = () => {
+    navigator.clipboard.writeText(json.key);
+    el('copyRawBtn').textContent = 'Copiata ✓';
+    setTimeout(()=> el('copyRawBtn').textContent = 'Copia', 1500);
+  };
+  await loadKeyState();
+};
+
+el('revokeBtn').onclick = async () => {
+  const { data } = await sb.from('api_keys').select('id').order('created_at',{ascending:false}).limit(1).maybeSingle();
+  if(!data) return;
+  await sb.from('api_keys').update({ attiva:false }).eq('id', data.id);
+  await loadKeyState();
+};
+
+// ---------- INIT ----------
+(async () => {
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session) onLoggedIn(session);
+})();
+</script>
+</body>
+</html>
