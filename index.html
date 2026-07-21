@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#050914;
@@ -270,6 +270,7 @@ el('authSubmitBtn').onclick = async () => {
   const email = el('emailInput').value.trim();
   const password = el('passInput').value;
   el('authError').textContent = '';
+  el('authError').style.color = 'var(--danger)';
   if(!email || !password){ el('authError').textContent = 'Inserisci email e password.'; return; }
 
   el('authSubmitBtn').disabled = true;
