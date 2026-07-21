@@ -283,7 +283,7 @@ el('authSubmitBtn').onclick = async () => {
   if(!isLoginMode && !data.session){
     el('authError').textContent = '';
     el('authError').style.color = 'var(--good)';
-    el('authError').textContent = 'Controlla la tua email per confermare l\\'account.';
+    el('authError').textContent = "Controlla la tua email per confermare l'account.";
     return;
   }
   onLoggedIn(data.session);
