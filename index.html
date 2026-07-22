@@ -325,19 +325,28 @@ async function loadKeyState(){
 el('genKeyBtn').onclick = async () => {
   el('genKeyBtn').disabled = true;
   el('keyMsg').textContent = '';
+  el('keyMsg').style.color = 'var(--danger)';
   const nome = el('keyNameInput').value.trim();
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-key`, {
-    method:'POST',
-    headers:{
-      'Authorization': `Bearer ${currentSession.access_token}`,
-      'Content-Type':'application/json'
-    },
-    body: JSON.stringify({ nome: nome || undefined })
-  });
-  const json = await res.json();
+
+  let res, json;
+  try {
+    res = await fetch(`${SUPABASE_URL}/functions/v1/generate-key`, {
+      method:'POST',
+      headers:{
+        'Authorization': `Bearer ${currentSession.access_token}`,
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify({ nome: nome || undefined })
+    });
+    json = await res.json();
+  } catch (err) {
+    el('genKeyBtn').disabled = false;
+    el('keyMsg').textContent = 'Errore di connessione: ' + err.message;
+    return;
+  }
   el('genKeyBtn').disabled = false;
 
-  if(!res.ok){ el('keyMsg').style.color='var(--danger)'; el('keyMsg').textContent = json.error || 'Errore nella generazione.'; return; }
+  if(!res.ok){ el('keyMsg').textContent = json.error || 'Errore nella generazione.'; return; }
 
   el('revealState').classList.remove('hidden');
   const span = el('rawKeyText');
